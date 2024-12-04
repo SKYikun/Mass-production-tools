@@ -1,3 +1,15 @@
+/****************************************************************
+ * @file netinput.c
+ * @brief 网络输入设备实现层 基于udp
+ * @detail 实现向管理层注册网络输入设备
+ * @author JunjieWu
+ * @date 2024.12.4
+ * @version v1.0.0
+ * @note 服务器端口 8888
+ * @warning：需要库使用者注意的信息，比如：功能未经完全验证，已知Bug
+ * @par v1.0.0 2024.12.4 创建该文件
+
+*****************************************************************/
 #include <input_manager.h>
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
@@ -16,7 +28,13 @@
 static int g_iSocketServer;
 
 
-
+/**
+ * @brief 向管理层提供，获取网络设备输入事件 阻塞
+ * @param PInputEvent ptInputEvent 要写入的输入事件地址
+ * @return 0表示成功 -1表示失败
+ * @note 使用recvfrom
+ * @warning：无
+ * */
 static int NetInputGetInputEvent(PInputEvent ptInputEvent)
 {
 	struct timeval tv;
@@ -42,6 +60,14 @@ static int NetInputGetInputEvent(PInputEvent ptInputEvent)
 }
 
 
+
+/**
+ * @brief 初始化网络输入事件的套接字接口
+ * @param void
+ * @return 0表示成功 -1表示失败
+ * @note 初始化socket bind服务器的ip和端口
+ * @warning：无
+ * */
 static int NetInputDeviceInit(void)
 {
 	struct sockaddr_in tSocketServerAddr;
@@ -67,6 +93,14 @@ static int NetInputDeviceInit(void)
 
 }
 
+
+/**
+ * @brief 关闭网络输入事件的套接字接口
+ * @param void
+ * @return 0
+ * @note close socket
+ * @warning：无
+ * */
 static int NetInputDeviceExit(void)
 {
 	close(g_iSocketServer);
@@ -74,6 +108,7 @@ static int NetInputDeviceExit(void)
 }
 
 
+//实例化管理层构造的输入设备结构体对象为网络输入设备
 static InputDevice g_tNetInputDev={
 	.name="netinput",
 	.GetInputEvent=NetInputGetInputEvent,
@@ -81,7 +116,16 @@ static InputDevice g_tNetInputDev={
 	.DeviceExit=NetInputDeviceExit,
 };
 
-void NetInputDevRegister(void)
+
+
+/**
+ * @brief 向管理层暴露的注册接口
+ * @param void
+ * @return 0
+ * @note
+ * @warning：无
+ * */
+extern void NetInputDevRegister(void)
 {
 	RegisterInputDev(&g_tNetInputDev);
 }

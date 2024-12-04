@@ -1,3 +1,15 @@
+/****************************************************************
+ * @file freetype.c
+ * @brief freetype字体的实现
+ * @detail 向上层注册freetype_opr
+ * @author JunjieWu
+ * @date 2024.12.4
+ * @version  v1.0.0
+ * @note使用注意事项  需要链接freetype库
+ * @warning：需要库使用者注意的信息，比如：功能未经完全验证，已知Bug
+ * @par 历史版本
+		 v1.0.0创建于2024.12.4，更新内容：创建该文件
+ * **************************************************************/
 #include <font_manager.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -17,6 +29,14 @@
 
 static FT_Face 	g_tFace;
 static int g_iDefaultFontSize=12;
+
+/**
+ * @brief 向管理层提供，获取笛卡尔坐标系下字符串的的外框
+ * @param char *str字符串,PRegionCartesian ptRegionCartesian 要写入的外框地址
+ * @return int 0表示成功 -1表示失败
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static int FreetypeGetSringRegionCar(char *str,PRegionCartesian ptRegionCartesian)
 {
     int i;
@@ -88,6 +108,16 @@ static int FreetypeGetSringRegionCar(char *str,PRegionCartesian ptRegionCartesia
 	return 0;
 }
 
+
+
+
+/**
+ * @brief 向管理层提供，freetype字体初始化
+ * @param char* aFineName 字库文件名
+ * @return int 0表示成功 -1表示失败
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static int FreeTypeFontInit(char* aFineName)
 {
 	FT_Library    library;
@@ -110,6 +140,17 @@ static int FreeTypeFontInit(char* aFineName)
 }
 
 
+
+
+
+
+/**
+ * @brief 向管理层提供，设置字体的大小
+ * @param int iFontSize 字体大小
+ * @return int 0表示成功
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static int FreeTypeSetFontSize(int iFontSize)
 {
 	FT_Set_Pixel_Sizes(g_tFace, iFontSize, 0);
@@ -117,6 +158,16 @@ static int FreeTypeSetFontSize(int iFontSize)
 }
 
 
+
+
+
+/**
+ * @brief 向管理层提供，根据传入的unicode值，获得字符的位图
+ * @param unsigned int dwCode unicode值, PFontBitMap ptFontBitMap 要写入到位图地址
+ * @return int 0表示成功 -1表示失败
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static int FreeTypeGetFontBitMap(unsigned int dwCode, PFontBitMap ptFontBitMap)
 {
 	int err;
@@ -150,7 +201,7 @@ static int FreeTypeGetFontBitMap(unsigned int dwCode, PFontBitMap ptFontBitMap)
 
 
 
-
+//实例化管理层抽象出的字体操作结构体对象
 static FontOpr g_tFontOperation={
 	.name="freetype",
 	.FontInit=FreeTypeFontInit,
@@ -159,6 +210,16 @@ static FontOpr g_tFontOperation={
 	.GetSringRegionCar=FreetypeGetSringRegionCar,
 };
 
+
+
+
+/**
+ * @brief 向管理层暴露的字体注册接口
+ * @param void
+ * @return void
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 void FreetypeRegister(void)
 {
 	RegisterFont(&g_tFontOperation);

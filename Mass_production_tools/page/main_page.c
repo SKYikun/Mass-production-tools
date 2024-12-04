@@ -1,3 +1,15 @@
+/************************************************************************
+ * @file main_page.c
+ * @brief  主程序主要运行菜单
+ * @detail 实现了Button里draw/onpressesd函数的重写 实现了Button界面的生成
+ * @author JunjieWu
+ * @date 2024.12.4
+ * @version v1.0.0
+ * @note 使用注意事项
+ * @warning：需要库使用者注意的信息，比如：功能未经完全验证，已知Bug
+ * @par 历史版本
+		v1.0.0创建于2024.12.4，更新内容：创建该文件
+ *************************************************************************/
 #include <font_manager.h>
 #include <page_manager.h>
 #include <config.h>
@@ -9,6 +21,8 @@
 #include <stdlib.h>
 
 
+#define DEBUG 0
+
 static Button g_tButtons[MAX_ITEM];
 static int g_tButtonCnt;
 int  iFontSize;
@@ -16,10 +30,16 @@ int  iFontSize;
 #define X_GAP 5
 #define Y_GAP 5
 
-#define DEBUG 1
 
 static float GetFontSizeForAllButton(void);
 
+/**
+ * @brief 重写按键的onpressed函数
+ * @param struct Button *ptButton Button对象指针,PDispBuf ptDispBuff帧缓存,PInputEvent ptInputEvent输入事件
+ * @return 0成功 -1失败
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static int MainOnpressed(struct Button *ptButton,PDispBuf ptDispBuff,PInputEvent ptInputEvent)
 {
 	unsigned int dwcolor=BUTTON_DEFAULT_COLOR;
@@ -98,6 +118,14 @@ static int MainOnpressed(struct Button *ptButton,PDispBuf ptDispBuff,PInputEvent
 }
 
 
+
+/**
+ * @brief 生成所有的Button
+ * @param void
+ * @return void
+ * @note
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static void GenerateButtons(void)
 {
 	int width,height;
@@ -146,19 +174,53 @@ static void GenerateButtons(void)
 			i++;
 		}
 	}
-	printf("%s %s %d\n",__FILE__,__FUNCTION__,__LINE__);
+	{
+		#if DEBUG
+		printf("%s %s %d\n",__FILE__,__FUNCTION__,__LINE__);
+		#endif
+	}
+
 	iFontSize=GetFontSizeForAllButton();
-	printf("%s %s %d\n",__FILE__,__FUNCTION__,__LINE__);
+
+	{
+		#if DEBUG
+		printf("%s %s %d\n",__FILE__,__FUNCTION__,__LINE__);
+		#endif
+	}
+
 	SetFontSize(iFontSize);
-	printf("%s %s %d\n",__FILE__,__FUNCTION__,__LINE__);
+
+	{
+		#if DEBUG
+		printf("%s %s %d\n",__FILE__,__FUNCTION__,__LINE__);
+		#endif
+	}
 	/*OnDraw*/
 	for(i=0;i<g_tButtonCnt;i++){
-		printf("i=%d\n",i);
+		{
+			#if DEBUG
+			printf("%s %s %d\n",__FILE__,__FUNCTION__,__LINE__);
+			#endif
+		}
 		g_tButtons[i].OnDraw(&g_tButtons[i],ptDispBuf);
 
 	}
 
 }
+
+
+
+
+
+
+
+/**
+ * @brief 判断触电是否在按钮的区域
+ * @param int iX,x坐标，int iY y坐标,PRegion ptRegion 按钮对应的区域
+ * @return PButton 对应Button的地址
+ * @note
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static int isTouchPointInRegion(int iX,int iY,PRegion ptRegion)
 {
 	if(iX<ptRegion->iLeftUpX || iX>=ptRegion->iLeftUpX+ptRegion->iWidth)
@@ -168,6 +230,15 @@ static int isTouchPointInRegion(int iX,int iY,PRegion ptRegion)
 	return 1;
 }
 
+
+
+/**
+ * @brief 根据名字来得到Button对象
+ * @param char* name Button的名字
+ * @return PButton 对应Button的地址
+ * @note
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static PButton GetButtonByName(char* name)
 {
 	int i;
@@ -179,6 +250,15 @@ static PButton GetButtonByName(char* name)
 	return NULL;
 }
 
+
+
+/**
+ * @brief 根据InputEvent来得到Button对象
+ * @param PInputEvent ptInputEvent 输入事件的地址
+ * @return PButton 对应Button的地址
+ * @note  对于网络输入设备通过解析字符串得到Button对象，对于ts设备通过x，y坐标确定
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static PButton GetButtonByInputEvent(PInputEvent ptInputEvent)
 {
 	int i;
@@ -197,6 +277,16 @@ static PButton GetButtonByInputEvent(PInputEvent ptInputEvent)
 	return NULL;
 }
 
+
+
+
+/**
+ * @brief 根据Button的数量计算字体大小
+ * @param void
+ * @return float font_size 适配按钮的字体大小
+ * @note 先找到最长的名字，随便给一个字体大小，算出字体外框，把外框放大到Button的大小，即可得到缩放系数
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static float GetFontSizeForAllButton(void)
 {
 	int i;
@@ -224,6 +314,17 @@ static float GetFontSizeForAllButton(void)
 	/*反算出font_size*/
 	return k*100*0.8;
 }
+
+
+
+
+/**
+ * @brief 主页面的run函数
+ * @param void* pParam
+ * @return int  0
+ * @note 根据配置文件生成绘制按钮，界面，阻塞读取输入事件，调用按键的onpresssed函数
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
 static int MainPageRun(void* pParam)
 {
 	int err;
@@ -254,12 +355,29 @@ static int MainPageRun(void* pParam)
 	return 0;
 }
 
+
+
+
+
+//实例化管理层构造的Page结构体对象
 static PageAction g_tMainPage={
 	.name="main",
 	.Run =MainPageRun,
 };
 
-void RegisterMainPage(void)
+
+
+
+
+
+/**
+ * @brief 把构造好的g_tMainPage注册到管理层的全局链表，通过这个唯一的接口暴露出内部的函数
+ * @param void
+ * @return void
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
+extern void RegisterMainPage(void)
 {
 	RegisterPage(&g_tMainPage);
 }

@@ -1,10 +1,29 @@
+/**
+ * @file config.c
+ * @brief 实现了配置文件的读取，解析，线性表的方式管理数据
+ * @detail
+ * @author JunjieWu
+ * @date 2024.12.4
+ * @version v1.0.0
+ * @note 使用注意事项
+ * @warning：需要库使用者注意的信息，比如：功能未经完全验证，已知Bug
+ * @par 历史版本
+		v1.0.0创建于2024.12.4，更新内容：创建该文件
+ * */
 #include <stdio.h>
 #include <config.h>
 #include <string.h>
 static ItemCfg g_ItemCfgs[MAX_ITEM];
 static int g_ItemCfgCount=0;
 
-int ParseConfigFile(void)
+/**
+ * @brief 解析配置文件
+ * @param void
+ * @return 0
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
+extern int ParseConfigFile(void)
 {
 	FILE *fp;
 	char buf[100];
@@ -38,13 +57,31 @@ int ParseConfigFile(void)
 	return 0;
 }
 
-int GetItemConfigCount(void)
+
+
+/**
+ * @brief 获取线性表长度
+ * @param void
+ * @return int g_ItemCfgCount线性表长度
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
+extern int GetItemConfigCount(void)
 {
 	return g_ItemCfgCount;
 
 }
 
-PItemCfg GetItemConfigByIndex(int index)
+
+
+/**
+ * @brief 通过索引取得保存在该文件全局线性表里的对象
+ * @param int index 配置项索引
+ * @return ItemCfg 配置项指针
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
+extern PItemCfg GetItemConfigByIndex(int index)
 {
 	if(index<g_ItemCfgCount)
 		return &g_ItemCfgs[index];
@@ -52,7 +89,16 @@ PItemCfg GetItemConfigByIndex(int index)
 		return NULL;
 }
 
-PItemCfg GetItemConfigByName(char* name)
+
+
+/**
+ * @brief 通过名字取得保存在该文件全局线性表里的对象
+ * @param char* name 配置项名字属性
+ * @return PItemCfg 配置项指针
+ * @note 备注信息
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
+extern PItemCfg GetItemConfigByName(char* name)
 {
 	int i;
 	for(i=0;i<g_ItemCfgCount;i++){
@@ -61,5 +107,4 @@ PItemCfg GetItemConfigByName(char* name)
 		}
 	}
 	return NULL;
-
 }

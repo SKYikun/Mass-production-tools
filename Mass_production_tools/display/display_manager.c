@@ -1,7 +1,19 @@
+/*************************************************************************
+ * @file display_manager.c
+ * @brief 显示设备管理层的库
+ * @detail 实现显示管理的函数
+ * @author JunjieWu
+ * @date 2024.12.4
+ * @version  v1.0.0
+ * @note
+ * @warning：<common.h>中有对NULL的宏定义
+ * @par 历史版本
+		V1.0.0创建于2024.12.4 更新内容：创建该文件
+**************************************************************************/
+
 #include <display_manager.h>
 #include <stdio.h>
 #include <string.h>
-#include <font_manager.h>
 
 
 /*管理底层lcd，web*/
@@ -16,7 +28,14 @@ int iLeftUpY;
 int iWidth;
 int iRows;
 
-void DrawTextInRegionCentural(char* name,PRegion ptRegion,unsigned int dwColor)
+/**
+ * @brief 在指定区域中居中显示一行文字
+ * @param char* name 显示的文字,PRegion ptRegion 指定的区域,unsigned int dwColor指定颜色
+ * @return void
+ * @note 使用freetype库 注意笛卡尔坐标系和lcd坐标系之间的转换
+ * @warning：需要函数使用者注意的信息，比如：功能未经完全验证
+ * */
+extern void DrawTextInRegionCentural(char* name,PRegion ptRegion,unsigned int dwColor)
 {
 	RegionCartesian tRegionCartesian;
 	int i=0;
@@ -52,8 +71,14 @@ void DrawTextInRegionCentural(char* name,PRegion ptRegion,unsigned int dwColor)
 }
 
 
-
-void DrawRegion(PRegion ptRegion,unsigned int dwColor)
+/**
+ * @brief 在帧缓存buf里绘制区域
+ * @param PRegion ptRegion 要绘制的区域,unsigned int dwColor 颜色
+ * @return void
+ * @note   超出屏幕的区域会被无视
+ * @warning：无
+ * */
+extern void DrawRegion(PRegion ptRegion,unsigned int dwColor)
 {
 	int x=ptRegion->iLeftUpX;
 	int y=ptRegion->iLeftUpY;
@@ -70,7 +95,15 @@ void DrawRegion(PRegion ptRegion,unsigned int dwColor)
 }
 
 
-void DrawFontBitmap(PFontBitMap ptFontBitMap,unsigned int dwColor)
+
+/**
+ * @brief 在帧缓存buf里绘制位图
+ * @param PFontBitMap ptFontBitMap 里面有region区域和bitmap,unsigned int dwColor 颜色
+ * @return void
+ * @note
+ * @warning：无
+ * */
+extern void DrawFontBitmap(PFontBitMap ptFontBitMap,unsigned int dwColor)
 {
 	int  i, j, p, q;
 	int x=ptFontBitMap->tRegion.iLeftUpX;
@@ -96,8 +129,16 @@ void DrawFontBitmap(PFontBitMap ptFontBitMap,unsigned int dwColor)
     }
 }
 
-/*在buf里绘制一个pixel*/
-int PutPixel(int x,int y,unsigned int dwColor)
+
+
+/**
+ * @brief 在帧缓存buf里绘制一个pixel
+ * @param int x,int y,unsigned int dwColor x，y坐标和颜色
+ * @return int 成功返回0
+ * @note
+ * @warning：无
+ * */
+extern int PutPixel(int x,int y,unsigned int dwColor)
 {
 	unsigned char *pen_8 =(unsigned char *)g_tDispBuf.buf+y*line_width+x*pixel_width;
 	unsigned short *pen_16;
@@ -139,8 +180,17 @@ int PutPixel(int x,int y,unsigned int dwColor)
 	return 0;
 }
 
-/*把绘制好的buf，flush到硬件*/
-int  DisplayRegionFlush(PRegion ptRegion,PDispBuf ptDisBuf)
+
+
+
+/**
+ * @brief 调用底层提供的函数把绘制好的buf给flush到硬件
+ * @param PRegion ptRegion 区域结构体地址    PDispBuf ptDisBuf 帧缓存结构体地址
+ * @return int 成功返回0 失败返回-1
+ * @note   得到帧缓存地址后，指定区域即可刷该区域
+ * @warning：无
+ * */
+extern int  DisplayRegionFlush(PRegion ptRegion,PDispBuf ptDisBuf)
 {
 	int iRet;
 	iRet=g_DispDefault->FlushRegion(ptRegion,ptDisBuf);
@@ -154,9 +204,13 @@ int  DisplayRegionFlush(PRegion ptRegion,PDispBuf ptDisBuf)
 
 
 
-/*
-给底层提供注册函数，底层调用后把构造的设备对象注册进此文件内的全局链表
-*/
+/**
+ * @brief 给底层提供注册函数，底层调用后把构造的设备对象注册进此文件内的全局链表
+ * @param PDispOpr ptDispOpr  底层构造的显示设备操作对象地址
+ * @return void
+ * @note   需要先创建一个全局链表头
+ * @warning：无
+ * */
 void RegisterDisplayer(PDispOpr ptDispOpr)
 {
 	ptDispOpr->ptNext=g_DispDevs;
@@ -165,30 +219,40 @@ void RegisterDisplayer(PDispOpr ptDispOpr)
 
 
 
-/*
-选择默认的显示器，遍历显示链表，通过设备名来选择
-*/
-int SlectDefaultDisplay(char *name)
+
+
+/**
+ * @brief 通过设备名来选择默认的显示器，遍历显示链表，保存默认显示设备到该文件
+ * @param char* name 显示设备名称
+ * @return int 成功返回0 失败返回-1
+ * @note 需要先注册显示系统
+ * @warning：无
+ * */
+extern int SlectDefaultDisplay(char *name)
 {
 	PDispOpr pTmp=g_DispDevs;
-	while(g_DispDevs!=NULL){
+	while(pTmp!=NULL){
 		if(strcmp(name,pTmp->name)==0){
 			g_DispDefault=pTmp;
 			return 0;
 		}
+		pTmp=pTmp->ptNext;
 	}
 	return -1;
 }
 
 
 
-/*
-初始化已选择的默认显示器
-通过默认显示对象，调用底层的私有函数
-1.硬件初始化
-2.获得buf
-*/
-int  InitDefaultDisplay(void)
+
+
+/**
+ * @brief 初始化默认显示设备的硬件，调用底层的私有函数保存默认显示设备的帧缓存及地址在该文件
+ * @param void
+ * @return int 成功返回0 失败返回-1
+ * @note 需要先选择默认显示设备硬件
+ * @warning：无
+ * */
+extern int  InitDefaultDisplay(void)
 {
 	int iRet;
 	iRet=g_DispDefault->DeviceInit();
@@ -206,18 +270,34 @@ int  InitDefaultDisplay(void)
 	return 0;
 }
 
-/*返回buf*/
-PDispBuf GetDisplayBuf(void)
+
+
+
+
+
+/**
+ * @brief 给上层提供获得默认显示设备的帧缓存基地址的接口
+ * @param void
+ * @return PDispBuf 帧缓存结构体的地址，里面有buf地址
+ * @note 需要先初始化默认显示设备硬件
+ * @warning：无
+ * */
+extern PDispBuf GetDisplayBuf(void)
 {
 	return &g_tDispBuf;
 }
 
 
 
-/*
-初始化所有显示器，把底层所有实例化的对象注册进链表
-*/
-void DisplaySystemRegister(void)
+
+/**
+ * @brief 初始化所有显示器，把底层所有实例化的对象注册进链表
+ * @param void
+ * @return void
+ * @note 需要调用到底层提供的FrameBufferRegister 要先声明
+ * @warning：无
+ * */
+extern void DisplaySystemRegister(void)
 {
 	extern void FrameBufferRegister(void);
 	FrameBufferRegister();
